@@ -1,0 +1,1 @@
+## NOTE KZ: I changed to the old way to make compatible with cocoa2/3. For cocoa4, see: https://github.com/CosmoLike/cocoa
