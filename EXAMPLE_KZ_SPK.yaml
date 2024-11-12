@@ -5,10 +5,11 @@ stop_at_error: True
 likelihood:
   lsst_y1.lsst_cosmic_shear:
     path: ./external_modules/data/lsst_y1
-    print_datavector: True
-    print_datavector_file: "./projects/lsst_y1/chains/KZ_MOD.modelvector"
-    non_linear_emul: 2
-    data_file: LSST_Y1.dataset
+    print_datavector: False
+    print_datavector_file: "./projects/lsst_y1/data/example1_lsst_y1_theory.modelvector"
+    non_linear_emul: 1
+    baryon_supression: 1
+    data_file: LSST_Y1_no_mask.dataset
   
 params:
   As_1e9:
@@ -81,93 +82,33 @@ params:
     value: -1.
     latex: w_{0,\mathrm{DE}}
     
-  # ---------------------------------------------------------------------------------------
-  # ------------------------------------- KZ bin modification parameters ------------------------------
-  # ---------------------------------------------------------------------------------------
-  # ------KZ NOTE: we change k bins from lowest to highest, so kbin5 isn't really used. But for z bin we change from 0 to highest z
-  # -------------- and all z higher than the highest bin is unchanged
-  kbins:
-      value: 6
-      latex: kbins
-  zbins:
-      value: 6
-      latex: zbins
-  kbin0:
-      value: 0.025
-      latex: kbin_{0}
-  kbin1:
-      value: 0.05
-      latex: kbin_{1}
-  kbin2:
-      value: 0.1
-      latex: kbin_{2}
-  kbin3:
-      value: 0.2
-      latex: kbin_{3}
-  kbin4:
-      value: 0.4
-      latex: kbin_{4}
-  kbin5:
-      value: 0.8
-      latex: kbin_{5}
-  #k values in each bin (ie. the value of alpha_of_k)
-  kvalue0:
-      value: 1.
-      latex: kvalue_{0}
-  kvalue1:
-      value: 1.
-      latex: kvalue_{1}
-  kvalue2:
-      value: 1.
-      latex: kvalue_{2}
-  kvalue3:
-      value: 1.
-      latex: kvalue_{3}
-  kvalue4:
-      value: 1.
-      latex: kvalue_{4}
-  kvalue5:
-      value: 1.
-      latex: kvalue_{5}
-  #z bins, used to be 0.1, 0.2, 0.4, 0.8, 1.6
-  # Now they got shifted to 0, 0.24, 0.48, ..., 1.2
-  zbin0:
-      value: 4.
-      latex: zbin_{0}
-  zbin1:
-      value: 4.4
-      latex: zbin_{1}
-  zbin2:
-      value: 4.8
-      latex: zbin_{2}
-  zbin3:
-      value: 5.2
-      latex: zbin_{3}
-  zbin4:
-      value: 5.6
-      latex: zbin_{4}
-  zbin5:
-      value: 6.
-      latex: zbin_{5}
-  #z values in each bin (ie. the value of beta_of_z)
-  zvalue0:
-      value: 1.0
-      latex: zvalue_{0}
-  zvalue1:
-      value: 1.1
-      latex: zvalue_{1}
-  zvalue2:
-      value: 1.
-      latex: zvalue_{2}
-  zvalue3:
-      value: 1.
-      latex: zvalue_{3}
-  zvalue4:
-      value: 1.
-      latex: zvalue_{4}
-  zvalue5:
-      value: 1.
-      latex: zvalue_{5}
+  alpha_spk:
+    prior:
+      dist: norm
+      loc: 4.18
+      scale: 0.12
+    ref: 4.18  
+    latex: \mathcal{alpha}_spk
+    proposal: 0.2 #kz i'm not sure about this
+
+  beta_spk:
+    prior:
+      dist: norm
+      loc: 1.26
+      scale: 0.08
+    ref: 1.26
+    latex: \mathcal{beta}_spk
+    proposal: 0.1 #kz i'm not sure about this
+    
+  gamma_spk:
+    prior:
+      dist: norm
+      loc: 0.42
+      scale: 0.10
+    ref: 0.42
+    latex: \mathcal{gamma}_spk
+    proposal: 0.2 #kz i'm not sure about this
+    
   # ---------------------------------------------------------------------------------------
   # ------------------------------------- DERIVED PARAMETERS ------------------------------
   # ---------------------------------------------------------------------------------------
@@ -235,7 +176,7 @@ sampler:
       ns: 0.96605
       H0: 67.32
       omegab: 0.04
-      omegam: 0.3
+      omegam: 0.30
       mnu: 0.06
       LSST_DZ_S1: 0.0
       LSST_DZ_S2: 0.0
@@ -249,6 +190,10 @@ sampler:
       LSST_M5: 0.0
       LSST_A1_1: 0.5
       LSST_A1_2: 0.0
+      
+      alpha_spk: 5.6 #4.189
+      beta_spk: 1.5 #1.273
+      gamma_spk: 0.298
 
 
-output: ./projects/lsst_y1/chains/EXAMPLE_KZ_MOD
+output: ./projects/lsst_y1/chains/EXAMPLE_spk_mod1

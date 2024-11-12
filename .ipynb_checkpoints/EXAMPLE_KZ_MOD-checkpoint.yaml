@@ -132,29 +132,29 @@ params:
   #z bins, used to be 0.1, 0.2, 0.4, 0.8, 1.6
   # Now they got shifted to 0, 0.24, 0.48, ..., 1.2
   zbin0:
-      value: 0.
+      value: 4.
       latex: zbin_{0}
   zbin1:
-      value: 0.4
+      value: 4.4
       latex: zbin_{1}
   zbin2:
-      value: 0.8
+      value: 4.8
       latex: zbin_{2}
   zbin3:
-      value: 1.2
+      value: 5.2
       latex: zbin_{3}
   zbin4:
-      value: 1.6
+      value: 5.6
       latex: zbin_{4}
   zbin5:
-      value: 2.
+      value: 6.
       latex: zbin_{5}
   #z values in each bin (ie. the value of beta_of_z)
   zvalue0:
       value: 1.0
       latex: zvalue_{0}
   zvalue1:
-      value: 1.0
+      value: 1.1
       latex: zvalue_{1}
   zvalue2:
       value: 1.

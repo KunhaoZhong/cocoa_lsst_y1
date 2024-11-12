@@ -4,3 +4,4 @@
 *.pyo
 *.cfg
 chains/
+.ipynb_checkpoints/

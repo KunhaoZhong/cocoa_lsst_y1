@@ -1,0 +1,37 @@
+timing: True
+debug: False
+stop_at_error: True
+
+likelihood:
+  gaussian_mixture:
+    input_params_prefix: test_
+    means: [ [0.1,0.1],
+        ]
+    covs:  [ [[0.01, 0],
+              [0,    0.05]],
+             ]
+
+params:
+  test_A:
+    prior:
+      min: -1
+      max: 1
+      
+  test_B:
+    prior:
+      min: -1
+      max: 1
+
+
+sampler:
+  nautilus:
+    n_live: 1000
+    #KZ: 2024.5.7: with emulators I can call this without a problem, although nautilus will remind me that the parallelization is not working.
+    # but for CAMB this will kill the program and idk why
+    parallel:
+      kind: cobaya_mpi
+      n_batch: 1000
+    is_equal_weights: False
+
+
+output: ./projects/lsst_y1/chains/EXAMPLE_MCMC_test

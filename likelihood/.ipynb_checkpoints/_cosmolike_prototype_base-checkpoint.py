@@ -6,6 +6,10 @@ import scipy
 from scipy.interpolate import interp1d
 import sys
 import time
+import warnings # KZ baryon-mod
+warnings.simplefilter("ignore", UserWarning) # KZ baryon-mod
+import pyspk as spk # KZ baryon-mod
+from astropy.cosmology import FlatLambdaCDM # KZ baryon-mod
 
 # Local
 from cobaya.likelihoods.base_classes import DataSetLikelihood
@@ -106,16 +110,16 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     self.force_cache_false = False
 
-    # ------------------------------------v1?------------------------------------
-    self.z_interp_1D = np.linspace(0,3.0,1000)
+    # ------------------------------------------------------------------------
+    self.z_interp_1D = np.linspace(0,2.0,1000)
     self.z_interp_1D = np.concatenate((self.z_interp_1D,
-      np.linspace(3.0,10.1,200)),axis=0)
+      np.linspace(2.0,10.1,200)),axis=0)
     self.z_interp_1D = np.concatenate((self.z_interp_1D,
       np.linspace(1080,2000,20)),axis=0) #CMB 6x2pt g_CMB (possible in the future)
     self.z_interp_1D[0] = 0
 
-    self.z_interp_2D = np.linspace(0,3.0,200)
-    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(3.0,10,50)),axis=0)
+    self.z_interp_2D = np.linspace(0,2.0,95)
+    self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.0,10,5)),axis=0)
     self.z_interp_2D[0] = 0
 
     self.len_z_interp_2D = len(self.z_interp_2D)
@@ -127,29 +131,6 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.len_k_interp_2D = len(self.k_interp_2D)
     self.len_pkz_interp_2D = self.len_log10k_interp_2D*self.len_z_interp_2D
     self.extrap_kmax = 2.5e2 * self.accuracyboost
-    
-#     # ------------------------------------cocoa2/3---test------------------------------------
-#     self.z_interp_1D = np.linspace(0,2.0,1000)
-#     self.z_interp_1D = np.concatenate((self.z_interp_1D,
-#       np.linspace(2.0,10.1,200)),axis=0)
-#     self.z_interp_1D = np.concatenate((self.z_interp_1D,
-#       np.linspace(1080,2000,20)),axis=0) #CMB 6x2pt g_CMB (possible in the future)
-#     self.z_interp_1D[0] = 0
-
-#     self.z_interp_2D = np.linspace(0,2.0,100)
-#     self.z_interp_2D = np.concatenate((self.z_interp_2D, np.linspace(2.01,10.1,50)),axis=0)
-#     self.z_interp_2D[0] = 0
-
-#     self.len_z_interp_2D = len(self.z_interp_2D)
-#     self.len_log10k_interp_2D = 1200
-#     self.log10k_interp_2D = np.linspace(-4.2,2.0,self.len_log10k_interp_2D)
-
-#     # Cobaya wants k in 1/Mpc
-#     self.k_interp_2D = np.power(10.0,self.log10k_interp_2D)
-#     #self.k_interp_2D = np.logspace(-4.2, 2.0, 1200, base=10) #SK
-#     self.len_k_interp_2D = len(self.k_interp_2D)
-#     self.len_pkz_interp_2D = self.len_log10k_interp_2D*self.len_z_interp_2D
-#     self.extrap_kmax = 2.5e2 * self.accuracyboost
 
     # ------------------------------------------------------------------------
 
@@ -230,34 +211,12 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       "omegam": None,
       "omegab": None,
       "mnu": None,
-      "kbins": None,
-      "zbins": None,
-      "kbin0": None,
-      "kbin1": None,
-      "kbin2": None,
-      "kbin3": None,
-      "kbin4": None,
-      "kbin5": None,
-      "kvalue0": None,
-      "kvalue1": None,
-      "kvalue2": None,
-      "kvalue3": None,
-      "kvalue4": None,
-      "kvalue5": None,
-      "zbin0": None,
-      "zbin1": None,
-      "zbin2": None,
-      "zbin3": None,
-      "zbin4": None,
-      "zbin5": None,
-      "zvalue0": None,
-      "zvalue1": None,
-      "zvalue2": None,
-      "zvalue3": None,
-      "zvalue4": None,
-      "zvalue5": None,
-      #KZ END
       "w": None,
+      # KZ baryon start
+      "alpha_spk": None,
+      "beta_spk": None,
+      "gamma_spk": None,  
+       # KZ baryon end
       "Pk_interpolator": {
         "z": self.z_interp_2D,
         "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -329,119 +288,89 @@ class _cosmolike_prototype_base(DataSetLikelihood):
       lnPL[i::self.len_z_interp_2D]  = t2[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]
     lnPL  += np.log((h**3))
 
+    
+
     if self.non_linear_emul == 1:
-        raise LoggedError(self.log, "EE2 with kz modification not implemented, the z range is limited", non_linear_emul)
 
-#         params = {
-#         'Omm'  : self.provider.get_param("omegam"),
-#         'As'   : self.provider.get_param("As"),
-#         'Omb'  : self.provider.get_param("omegab"),
-#         'ns'   : self.provider.get_param("ns"),
-#         'h'    : h,
-#         'mnu'  : self.provider.get_param("mnu"), 
-#         'w'    : self.provider.get_param("w"),
-#         'wa'   : 0.0
-#         }
+      params = {
+        'Omm'  : self.provider.get_param("omegam"),
+        'As'   : self.provider.get_param("As"),
+        'Omb'  : self.provider.get_param("omegab"),
+        'ns'   : self.provider.get_param("ns"),
+        'h'    : h,
+        'mnu'  : self.provider.get_param("mnu"), 
+        'w'    : self.provider.get_param("w"),
+        'wa'   : 0.0
+      }
 
-#         kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D))
-#         kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D, kbt)
-#         logkbt = np.log10(kbt)
+      kbt = np.power(10.0, np.linspace(-2.0589, 0.973, self.len_k_interp_2D)) 
+      kbt, tmp_bt = self.emulator.get_boost(params, self.z_interp_2D, kbt)
+      logkbt = np.log10(kbt)
 
-#         for i in range(self.len_z_interp_2D):    
-#             interp = interp1d(logkbt, 
-#                 np.log(tmp_bt[i]), 
-#                 kind = 'linear', 
-#                 fill_value = 'extrapolate', 
-#                 assume_sorted = True
-#               )
+      for i in range(self.len_z_interp_2D):    
+        interp = interp1d(logkbt, 
+            np.log(tmp_bt[i]), 
+            kind = 'linear', 
+            fill_value = 'extrapolate', 
+            assume_sorted = True
+          )
 
-#             lnbt = interp(log10k_interp_2D)
-#             lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
-
-#             lnPNL[i::self.len_z_interp_2D]  = lnPL[i::self.len_z_interp_2D] + lnbt
+        lnbt = interp(log10k_interp_2D)
+        lnbt[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+    
+        lnPNL[i::self.len_z_interp_2D]  = lnPL[i::self.len_z_interp_2D] + lnbt
       
     elif self.non_linear_emul == 2:
-        for i in range(self.len_z_interp_2D):
-            lnPNL[i::self.len_z_interp_2D]  = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
-        lnPNL += np.log((h**3))
-        
-        ## KZ START
-        kbins = self.provider.get_param("kbins")
-        zbins = self.provider.get_param("zbins")
-        self.ALPHA_LIST = [] # values for k-bin changes
-        self.BETA_LIST  = [] # values for z-bin changes
-        self.entered_k_list = []
-        self.entered_z_list = []
 
-        for i in range(int(kbins)):
-            x = "kbin" + str(i)
-            y = "kvalue" + str(i)
-            adder_bin = self.provider.get_param(x)
-            adder_value = self.provider.get_param(y)
-            self.entered_k_list.append(adder_bin)
-            self.ALPHA_LIST.append(adder_value)
-
-        for i in range(int(zbins)):
-            x = "zbin" + str(i)
-            y = "zvalue" + str(i)
-            adder_bin = self.provider.get_param(x)
-            adder_value = self.provider.get_param(y)
-            self.entered_z_list.append(adder_bin)
-            self.BETA_LIST.append(adder_value)
-
-        self.ALPHA_LIST = np.array(self.ALPHA_LIST)
-        self.BETA_LIST = np.array(self.BETA_LIST)
-
-        print("saving test")
-        np.save("lnPNL_before_mod", lnPNL)
-        lnPL = lnPL.reshape(-1, self.z_interp_2D.shape[0]).T
-        lnPNL = lnPNL.reshape(-1, self.z_interp_2D.shape[0]).T
-
-        z_indices = np.digitize(self.z_interp_2D, self.entered_z_list, right=True) - 1
-        k_indices = np.digitize(self.k_interp_2D, self.entered_k_list, right=True) - 1
-
-        z_indices = np.clip(z_indices, 0, len(self.BETA_LIST) - 1)
-        k_indices = np.clip(k_indices, 0, len(self.ALPHA_LIST) - 1)
-
-        addition_array = np.zeros_like(lnPNL)
-        k_add = np.zeros(len(k_indices))
-        z_add = np.zeros(len(z_indices))
-        
-        # print("KZ TESTING")
-        # print(self.BETA_LIST.shape, self.ALPHA_LIST.shape)
-        print("saving test")
-        np.save("zk_indices", [z_indices, k_indices])
-        # z loop: note the difference in z and k here
-        for i in np.arange(zbins)+1:
-            tmp = np.where(z_indices==i-1)[0] # note the difference here
-            # print("TESTING")
-            # print(tmp)
-            # print(z_add.shape)
-            # print(z_add[tmp])
-            # print(self.BETA_LIST)
-            if len(tmp)>1:
-                z_add[tmp] = np.log(self.BETA_LIST[int(i-1)])
-        # k loop: note the difference in z and k here
-        for i in np.arange(kbins)+1:
-            tmp = np.where(k_indices==i)[0]
-            if len(tmp)>1:
-                k_add[tmp] = np.log(self.ALPHA_LIST[int(i-1)])
-        addition_array = np.add.outer(z_add, k_add)
-
-        #lnPL += addition_array
-        lnPNL += addition_array
-
-        lnPL = lnPL.T
-        lnPL = lnPL.reshape(-1)
-        lnPNL = lnPNL.T
-        lnPNL = lnPNL.reshape(-1)
-        print("saving test")
-        np.save("lnPNL_mod", lnPNL)
-        
-        ## KZ END
+      for i in range(self.len_z_interp_2D):
+        lnPNL[i::self.len_z_interp_2D]  = t1[i*self.len_k_interp_2D:(i+1)*self.len_k_interp_2D]  
+      lnPNL += np.log((h**3))      
 
     else:
       raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", non_linear_emul)
+
+    
+    
+    ######## KZ baryon start
+    ## kz note: for safety, we'll iterate every z specified. the supression in low z is not very smooth so probably better not to trust interpolator
+    #call the supression model before the non-linear pk calculation
+
+    if self.baryon_supression == 1:
+        if self.non_linear_emul == 2:
+            raise NotImplementedError # not tested by kunhao
+
+        cosmo = FlatLambdaCDM(H0=self.provider.get_param("H0"), Om0=self.provider.get_param("omegam"),) 
+
+        alpha = self.provider.get_param("alpha_spk")
+        beta  = self.provider.get_param("beta_spk")
+        gamma = self.provider.get_param("gamma_spk")
+        
+        for i, this_z in enumerate(self.z_interp_2D):
+            # KZ note: spk only works for z<3. let's assume higher z doesn't matter
+            # for future we might need even a lower-z cutoff because of spk calibration
+            if this_z < 3. and this_z>0.125: # KZ include the lower bound gives a chi2 shift of ~15
+                # k_spk, sup = spk.sup_model(SO=200, z=this_z, fb_a=fb_a, fb_pow=fb_pow, fb_pivot=fb_pivot, k_max=8, verbose=False) # method 1 example
+                k_spk, sup = spk.sup_model(SO=500, z=this_z, alpha=alpha, beta=beta, gamma=gamma, cosmo=cosmo, verbose=False) # method 2
+
+                # some parameter space will return nans, in that case just assume no baryonic effect
+                sup[np.isnan(sup)] = 0
+                print('kz testing nan sup', this_z, type(sup), sup)
+                interp_spk = interp1d(np.log10(k_spk), 
+                np.log(sup), 
+                kind = 'linear', 
+                fill_value = 'extrapolate', 
+                assume_sorted = True
+                                )
+                
+                
+
+                lnbt_spk = interp_spk(log10k_interp_2D)
+                lnbt_spk[np.power(10,log10k_interp_2D) < 8.73e-3] = 0.0
+
+                lnPNL[i::self.len_z_interp_2D]  = lnPNL[i::self.len_z_interp_2D] + lnbt_spk
+                
+    ######## KZ baryon end
+        
 
     # Compute chi(z) - convert to Mpc/h
     chi = self.provider.get_comoving_radial_distance(self.z_interp_1D) * h
